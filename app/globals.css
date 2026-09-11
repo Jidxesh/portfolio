@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #050706;
+  --color-surface: #0a0f0b;
+  --color-surface-2: #101610;
+  --color-line: #1e2a20;
+  --color-line-soft: #151e17;
+  --color-body: #9aa69c;
+  --color-muted: #808e83;
+  --color-lime: #a3e635;
+  --color-lime-hover: #bef264;
+  --color-lime-dim: #4d7c0f;
+  --color-cyan: #22d3ee;
+  --color-glow: #84cc16;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-big: var(--font-outfit), var(--font-space-grotesk), sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ink);
+  overflow-x: hidden;
+  color: #f4f7f4;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-lime);
+  color: var(--color-ink);
+}
+
+/* dotted / grid field behind the page */
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--color-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line-soft) 1px, transparent 1px);
+  background-size: 70px 70px;
+  opacity: 0.32;
+  mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 0%, transparent 72%);
+}
+
+/* ---------------------------------------------------------------
+   Native scroll-driven animations.
+   animation-timeline runs these off the main thread, so they stay
+   smooth under load. Guarded by @supports — where unsupported the
+   element just renders in its final state.
+   --------------------------------------------------------------- */
+
+@keyframes orbit {
+  from { transform: rotateZ(0deg); }
+  to   { transform: rotateZ(360deg); }
+}
+
+@keyframes sd-enter {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes sd-drift-left {
+  from { transform: translateX(4%); }
+  to   { transform: translateX(-4%); }
+}
+
+@keyframes sd-drift-right {
+  from { transform: translateX(-4%); }
+  to   { transform: translateX(4%); }
+}
+
+@keyframes sd-reveal-line {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* progress tied to the element's own position in the viewport */
+    .sd-enter {
+      animation: sd-enter linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 30%;
+    }
+
+    .sd-line {
+      transform-origin: left;
+      animation: sd-reveal-line linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 40%;
+    }
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* progress tied to the document scroller, start to finish */
+    .sd-drift {
+      animation: sd-drift-left linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    .sd-drift-rev {
+      animation: sd-drift-right linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
